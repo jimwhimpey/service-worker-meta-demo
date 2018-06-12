@@ -1,0 +1,13 @@
+<head>
+
+	<title>Service Worker Meta Data Demo</title>
+	<script type="text/javascript" src="script.js"></script>
+
+	<script type="text/javascript">
+		navigator.serviceWorker.register('./sw.js').then((reg) => {
+			console.log('service worker registered and installed', reg);
+		});
+	</script>
+
+</head>
+<body><body>
