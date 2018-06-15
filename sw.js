@@ -4,25 +4,23 @@ self.addEventListener('install', (event) => {
 
 	const request = new Request('./script.js');
 
-	// Add some meta data we want to persist through the cache
-	request['time_cached'] = new Date();
-	request['meta'] = 'Jim’s meta';
-
-	// Right here we have that data
-	console.log("install time meta: request['time_cached']", request['time_cached']);
-	console.log("install time meta: request['meta']", request['meta']);
-
 	event.waitUntil(fetch(request).then(networkResponse => caches.open(CACHE_KEY).then((cache) => {
 
-		// Try attaching some meta to the response too.
-		networkResponse['time_cached'] = new Date();
-		networkResponse['meta'] = 'Jim’s meta';
+		const customHeaders = new Headers({
+			'Content-Type': 'text/plain',
+			'Time-Cached': new Date(),
+			'Meta': 'Jims',
+		});
 
-		// Right here we have that data
-		console.log("install time meta: networkResponse['time_cached']", networkResponse['time_cached']);
-		console.log("install time meta: networkResponse['meta']", networkResponse['meta']);
+		const customResponseData = {
+			status: 200,
+			statusText: "OK",
+			headers: customHeaders,
+		};
 
-		cache.put(request, networkResponse);
+		const customResponse = new Response(networkResponse.body, customResponseData);
+
+		return cache.put(request, customResponse);
 
 	})));
 
@@ -37,12 +35,8 @@ self.addEventListener('fetch', (event) => {
 
 			if (response) {
 
-				// There's no meta data =(
-				console.log("fetch time meta: request['time_cached']", request['time_cached']);
-				console.log("fetch time meta: request['meta']", request['meta']);
-				console.log("fetch time meta: response['time_cached']", response['time_cached']);
-				console.log("fetch time meta: response['meta']", response['meta']);
-
+				console.log("Time-Cached", response.headers.get('Time-Cached'));
+				console.log("Meta", response.headers.get('Meta'));
 				return response;
 
 			} else {
